@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Astrology Prediction</title>
+  <title>Jyotish Prediction</title>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1d4ed8">
   <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
@@ -20,23 +20,28 @@
       padding: 0;
       background: #f3f4f6;
     }
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+      color: #1e3a8a;
+    }
     .container {
       display: flex;
-      justify-content: space-between;
       max-width: 1200px;
-      margin: 40px auto;
+      margin: 0 auto;
       padding: 20px;
       background-color: white;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       border-radius: 10px;
+      gap: 20px;
     }
-    .form-area, .output-area {
-      width: 48%;
+    .left-panel {
+      width: 40%;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #2c3e50;
+    .right-panel {
+      width: 60%;
+      overflow-y: auto;
+      max-height: 80vh;
     }
     label {
       font-weight: bold;
@@ -45,14 +50,14 @@
     }
     input, select {
       padding: 6px;
-      width: 95%;
+      width: 100%;
       margin-top: 5px;
       border-radius: 4px;
       border: 1px solid #ccc;
       font-size: 14px;
     }
     button {
-      margin-top: 20px;
+      margin-top: 15px;
       padding: 10px 16px;
       font-size: 14px;
       background-color: #1d4ed8;
@@ -64,33 +69,37 @@
     button:hover {
       background-color: #2563eb;
     }
-    #result {
-      margin-top: 20px;
-      font-size: 16px;
-      white-space: pre-line;
-      max-height: 400px;
-      overflow-y: auto;
-      padding-right: 10px;
-    }
-    #chart img, #chart svg {
-      margin-top: 20px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      width: 100%;
-    }
     #downloadPdfBtn {
-      margin-top: 10px;
       background-color: #10b981;
     }
     #downloadPdfBtn:hover {
       background-color: #059669;
+    }
+    #chart {
+      margin-top: 20px;
+    }
+    #chart svg {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 100%;
+    }
+    #result {
+      margin-top: 20px;
+      white-space: pre-line;
+      font-size: 16px;
+    }
+    .footer {
+      text-align: center;
+      margin: 20px;
+      color: gray;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
   <h1>Get Your Jyotish Prediction</h1>
   <div class="container">
-    <div class="form-area">
+    <div class="left-panel">
       <label for="name">Name:</label>
       <input type="text" id="name">
 
@@ -110,14 +119,15 @@
       </select>
 
       <button onclick="getPrediction()">Get Prediction</button>
-    </div>
-
-    <div class="output-area">
-      <div id="result">Your prediction will appear here...</div>
-      <div id="chart"></div>
       <button id="downloadPdfBtn" style="display: none" onclick="downloadPdf()">Download Your Jyotish Predictions</button>
+
+      <div id="chart"></div>
+    </div>
+    <div class="right-panel">
+      <div id="result">Your prediction will appear here...</div>
     </div>
   </div>
+  <div class="footer">Service provided by Palmology</div>
 
   <script>
     async function getPrediction() {
@@ -126,7 +136,6 @@
       const tob = document.getElementById('time').value;
       const [hour, minute] = tob.split(':').map(Number);
       const location = document.getElementById('location').value;
-
       const geoResponse = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(location)}&key=15459e2a83eb42de9cd2b77a168c9307`);
       const geoData = await geoResponse.json();
       const { lat, lng } = geoData.results[0].geometry;
@@ -157,7 +166,6 @@
         });
 
         const result = await response.json();
-
         if (result.prediction) {
           document.getElementById('result').innerText = result.prediction;
           if (result.chartSvg) {
@@ -172,7 +180,6 @@
         } else {
           document.getElementById('result').innerText = 'Prediction failed. Try again.';
         }
-
       } catch (err) {
         document.getElementById('result').innerText = 'Error: Unable to get prediction.';
         console.error(err);
