@@ -1,0 +1,21 @@
+// public/manifest.json
+{
+  "name": "Astro Prediction App",
+  "short_name": "AstroApp",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1d4ed8",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
