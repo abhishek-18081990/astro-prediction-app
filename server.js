@@ -23,7 +23,7 @@ const ASTROLOGY_DASHA_URL = "https://json.astrologyapi.com/v1/current_vdasha";
 
 const ASTROLOGY_USER_ID = "640013";
 const ASTROLOGY_API_KEY = "b45f91ba310fe0b5ba3d25fdebdedf8037443422";
-const OPENAI_API_KEY = "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";
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 // 🌠 Main Prediction Route
 app.post('/predict', async (req, res) => {
