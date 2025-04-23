@@ -144,7 +144,7 @@
       document.getElementById('downloadPdfBtn').style.display = 'none';
 
       try {
-        const response = await fetch('http://localhost:5000/predict', {
+        const response = await fetch(`${window.location.origin}/predict`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
