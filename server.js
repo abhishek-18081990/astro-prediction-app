@@ -30,19 +30,23 @@ app.post('/predict', async (req, res) => {
   const { name, day, month, year, hour, minute, latitude, longitude, timezone, language } = req.body;
 
   try {
+    console.log("📩 New prediction request received:", req.body);
     const commonPayload = { day, month, year, hour, min: minute, lat: latitude, lon: longitude, tzone: timezone };
 
-    const [astroResponse, dashaResponse, chartResponse] = await Promise.all([
-      axios.post(ASTROLOGY_PLANETS_URL, commonPayload, {
-        auth: { username: ASTROLOGY_USER_ID, password: ASTROLOGY_API_KEY }
-      }),
-      axios.post(ASTROLOGY_DASHA_URL, commonPayload, {
-        auth: { username: ASTROLOGY_USER_ID, password: ASTROLOGY_API_KEY }
-      }),
-      axios.post(ASTROLOGY_CHART_URL, commonPayload, {
-        auth: { username: ASTROLOGY_USER_ID, password: ASTROLOGY_API_KEY }
-      })
-    ]);
+    console.log("🔭 Calling AstrologyAPI - Planets...");
+    const astroResponse = await axios.post(ASTROLOGY_PLANETS_URL, commonPayload, {
+      auth: { username: ASTROLOGY_USER_ID, password: ASTROLOGY_API_KEY }
+    });
+
+    console.log("📿 Calling AstrologyAPI - Dasha...");
+    const dashaResponse = await axios.post(ASTROLOGY_DASHA_URL, commonPayload, {
+      auth: { username: ASTROLOGY_USER_ID, password: ASTROLOGY_API_KEY }
+    });
+
+    console.log("🧭 Calling AstrologyAPI - D1 Chart...");
+    const chartResponse = await axios.post(ASTROLOGY_CHART_URL, commonPayload, {
+      auth: { username: ASTROLOGY_USER_ID, password: ASTROLOGY_API_KEY }
+    });
 
     const planetaryData = astroResponse.data;
     const dashaData = dashaResponse.data;
@@ -62,6 +66,7 @@ app.post('/predict', async (req, res) => {
 
     const fullPrompt = `Name: ${name}\nDOB: ${day}-${month}-${year}\nTime: ${hour}:${minute}\nLocation: ${latitude}, ${longitude}, Timezone: ${timezone}\n\nPlanetary Data:\n${formattedPlanets}\n\nCurrent Dasha Details:\n${formattedDashas}`;
 
+    console.log("🧠 Sending data to OpenAI...");
     const openaiResponse = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
@@ -80,15 +85,18 @@ app.post('/predict', async (req, res) => {
     );
 
     const prediction = openaiResponse.data.choices[0].message.content;
+    console.log("✅ Prediction generated successfully");
 
     res.json({ prediction, chartSvg });
 
   } catch (error) {
-    console.error("Error:", error.message);
+    const code = error.response?.status || 'No status';
+    const data = error.response?.data || error.message;
+    console.error("❌ Error in /predict route:", code, data);
     res.status(500).json({ error: 'Failed to generate prediction' });
   }
 });
 
 // ✅ PORT Setup
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
