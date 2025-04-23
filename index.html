@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jyotish Prediction App</title>
-  <link rel="manifest" href="/manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Astro Jyotish Prediction</title>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#1d4ed8" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -16,78 +18,81 @@
       max-width: 600px;
       margin: auto;
       padding: 20px;
-      background: white;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      border-radius: 8px;
+      background-color: white;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
     }
     h1 {
       text-align: center;
-      color: #1e3a8a;
+      color: #1d4ed8;
     }
     label {
-      display: block;
-      margin-top: 15px;
       font-weight: bold;
+      display: block;
+      margin-top: 10px;
     }
     input, select {
-      width: 100%;
       padding: 8px;
+      width: 100%;
       margin-top: 5px;
-      border-radius: 5px;
+      border-radius: 4px;
       border: 1px solid #ccc;
+      font-size: 14px;
     }
     button {
       margin-top: 20px;
       width: 100%;
-      padding: 10px;
-      background: #1d4ed8;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #1d4ed8;
       color: white;
       border: none;
       border-radius: 5px;
-      font-size: 16px;
       cursor: pointer;
     }
     button:hover {
-      background: #2563eb;
+      background-color: #2563eb;
     }
-    .section {
-      margin-top: 30px;
+    #result {
+      margin-top: 20px;
+      font-size: 16px;
+      white-space: pre-line;
     }
     #chart img, #chart svg {
+      margin-top: 20px;
       width: 100%;
       border: 1px solid #ccc;
       border-radius: 8px;
-      margin-top: 10px;
     }
     #downloadPdfBtn {
+      margin-top: 20px;
       background-color: #10b981;
     }
     #downloadPdfBtn:hover {
       background-color: #059669;
     }
-    footer {
+    .footer {
       margin-top: 30px;
       text-align: center;
+      color: #6b7280;
       font-size: 14px;
-      color: gray;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Get Your Jyotish Prediction</h1>
-
     <label for="name">Name:</label>
-    <input type="text" id="name">
+    <input type="text" id="name" />
 
     <label for="dob">Date of Birth:</label>
-    <input type="date" id="dob">
+    <input type="date" id="dob" />
 
     <label for="time">Time of Birth (HH:MM):</label>
-    <input type="time" id="time">
+    <input type="time" id="time" />
 
     <label for="location">Location (City, State, Country):</label>
-    <input type="text" id="location">
+    <input type="text" id="location" />
 
     <label for="language">Language:</label>
     <select id="language">
@@ -97,15 +102,22 @@
 
     <button onclick="getPrediction()">Get Prediction</button>
 
-    <div class="section" id="chart"></div>
-    <div class="section" id="result">Your prediction will appear here...</div>
+    <div id="chart"></div>
+    <div id="result">Your prediction will appear here...</div>
     <button id="downloadPdfBtn" style="display: none" onclick="downloadPdf()">Download Your Jyotish Predictions</button>
 
-    <footer>
-      Service provided by Palmology
-    </footer>
+    <div class="footer">Service provided by Palmology</div>
   </div>
 
-  <!-- Script here (same as current logic) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').then(function(reg) {
+        console.log('Service Worker Registered!', reg);
+      }).catch(function(err) {
+        console.log('Service Worker registration failed: ', err);
+      });
+    }
+  </script>
+  <script src="script.js"></script>
 </body>
 </html>
