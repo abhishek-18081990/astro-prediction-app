@@ -70,7 +70,7 @@ app.post('/predict', async (req, res) => {
     const openaiResponse = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
-        model: "gpt-4.1-nano",
+        model: "gpt-4.1",
         messages: [
           { role: "system", content: langPrompt },
           { role: "user", content: fullPrompt }
