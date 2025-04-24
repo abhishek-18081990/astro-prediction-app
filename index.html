@@ -94,19 +94,6 @@
       color: gray;
       font-size: 14px;
     }
-    .loader {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #1d4ed8;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 10px auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
   </style>
 </head>
 <body>
@@ -137,13 +124,7 @@
       <div id="chart"></div>
     </div>
     <div class="right-panel">
-      <div id="result">
-        <div id="loadingAnimation" style="display: none; text-align:center;">
-          <div class="loader"></div>
-          <p>Generating prediction...</p>
-        </div>
-        <div id="predictionText">Your prediction will appear here...</div>
-      </div>
+      <div id="result">Your prediction will appear here...</div>
     </div>
   </div>
   <div class="footer">Service provided by Palmology</div>
@@ -173,8 +154,7 @@
         language: document.getElementById('language').value
       };
 
-      document.getElementById('loadingAnimation').style.display = 'block';
-      document.getElementById('predictionText').innerText = '';
+      document.getElementById('result').innerText = 'Generating prediction...';
       document.getElementById('chart').innerHTML = '';
       document.getElementById('downloadPdfBtn').style.display = 'none';
 
@@ -186,10 +166,8 @@
         });
 
         const result = await response.json();
-        document.getElementById('loadingAnimation').style.display = 'none';
-
         if (result.prediction) {
-          document.getElementById('predictionText').innerText = result.prediction;
+          document.getElementById('result').innerText = result.prediction;
           if (result.chartSvg) {
             document.getElementById('chart').innerHTML = `
               <h3>Your Lagan Chart (D1)</h3>
@@ -200,12 +178,57 @@
           }
           document.getElementById('downloadPdfBtn').style.display = 'inline-block';
         } else {
-          document.getElementById('predictionText').innerText = 'Prediction failed. Try again.';
+          document.getElementById('result').innerText = 'Prediction failed. Try again.';
         }
       } catch (err) {
-        document.getElementById('loadingAnimation').style.display = 'none';
-        document.getElementById('predictionText').innerText = 'Error: Unable to get prediction.';
+        document.getElementById('result').innerText = 'Error: Unable to get prediction.';
         console.error(err);
+      }
+    }
+
+    function downloadPdf() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const name = document.getElementById('name').value;
+      const prediction = document.getElementById('result').innerText;
+      const lines = doc.splitTextToSize(prediction, 180);
+      let y = 20;
+      doc.text(`Jyotish Prediction for ${name}`, 10, 10);
+
+      lines.forEach(line => {
+        if (y > 250) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(line, 10, y);
+        y += 7;
+      });
+
+      const svgElement = document.querySelector('#svgContainer svg');
+      if (svgElement) {
+        const svgData = new XMLSerializer().serializeToString(svgElement);
+        const canvas = document.createElement('canvas');
+        const svgSize = svgElement.getBoundingClientRect();
+        canvas.width = svgSize.width;
+        canvas.height = svgSize.height;
+        const ctx = canvas.getContext('2d');
+
+        const img = new Image();
+        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        img.onload = function () {
+          ctx.drawImage(img, 0, 0);
+          URL.revokeObjectURL(url);
+          const imgData = canvas.toDataURL('image/png');
+
+          doc.addPage();
+          doc.addImage(imgData, 'PNG', 10, 10, 180, 180);
+          doc.save(`${name.replace(/\s+/g, '_')}_jyotish_prediction.pdf`);
+        };
+        img.src = url;
+      } else {
+        doc.save(`${name.replace(/\s+/g, '_')}_jyotish_prediction.pdf`);
       }
     }
   </script>
