@@ -8,11 +8,10 @@
   <meta name="theme-color" content="#1d4ed8">
   <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js');
-    }
-  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.standard_fonts_metrics.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.split_text_to_size.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.addimage.min.js"></script>
+
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -102,25 +101,19 @@
     <div class="left-panel">
       <label for="name">Name:</label>
       <input type="text" id="name">
-
       <label for="dob">Date of Birth:</label>
       <input type="date" id="dob">
-
       <label for="time">Time of Birth (HH:MM):</label>
       <input type="time" id="time">
-
       <label for="location">Location (City, State, Country):</label>
       <input type="text" id="location">
-
       <label for="language">Language:</label>
       <select id="language">
         <option value="english">English</option>
         <option value="hindi">Hindi</option>
       </select>
-
       <button onclick="getPrediction()">Get Prediction</button>
       <button id="downloadPdfBtn" style="display: none" onclick="downloadPdf()">Download Your Jyotish Predictions</button>
-
       <div id="chart"></div>
     </div>
     <div class="right-panel">
@@ -130,6 +123,20 @@
   <div class="footer">Service provided by Palmology</div>
 
   <script>
+    const hindiFont = 'NotoSansDevanagari';
+
+    (function loadFont() {
+      const fontUrl = 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts/hinted/ttf/NotoSansDevanagari/NotoSansDevanagari-Regular.ttf';
+      fetch(fontUrl)
+        .then(res => res.arrayBuffer())
+        .then(buffer => {
+          window.jspdf.jsPDF.API.events.push(['addFonts', function () {
+            this.addFileToVFS("NotoSansDevanagari-Regular.ttf", btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')));
+            this.addFont("NotoSansDevanagari-Regular.ttf", hindiFont, "normal");
+          }]);
+        });
+    })();
+
     async function getPrediction() {
       const dob = document.getElementById('dob').value;
       const [year, month, day] = dob.split('-').map(Number);
@@ -169,12 +176,9 @@
         if (result.prediction) {
           document.getElementById('result').innerText = result.prediction;
           if (result.chartSvg) {
-            document.getElementById('chart').innerHTML = `
-              <h3>Your Lagan Chart (D1)</h3>
-              <div id="svgContainer">${result.chartSvg}</div>
-            `;
+            document.getElementById('chart').innerHTML = `<h3>Your Lagan Chart (D1)</h3><div id="svgContainer">${result.chartSvg}</div>`;
           } else {
-            document.getElementById('chart').innerHTML = '<p style="color:red;">Chart image URL not received from API.</p>';
+            document.getElementById('chart').innerHTML = '<p style="color:red;">Chart image not received.</p>';
           }
           document.getElementById('downloadPdfBtn').style.display = 'inline-block';
         } else {
@@ -191,10 +195,14 @@
       const doc = new jsPDF();
       const name = document.getElementById('name').value;
       const prediction = document.getElementById('result').innerText;
+      const language = document.getElementById('language').value;
       const lines = doc.splitTextToSize(prediction, 180);
-      let y = 20;
+
+      doc.setFont(language === "hindi" ? "NotoSansDevanagari" : "helvetica");
+      doc.setFontSize(12);
       doc.text(`Jyotish Prediction for ${name}`, 10, 10);
 
+      let y = 20;
       lines.forEach(line => {
         if (y > 250) {
           doc.addPage();
