@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Palmology Jyotish Predictions</title>
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#1d4ed8" />
+  <meta name="theme-color" content="#0b1e3d" />
   <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
   <!-- AOS Animation CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
@@ -18,20 +18,20 @@
       width: 100%;
       height: 100%;
       z-index: -1;
-      background: #0f0f0f;
+      background: #0b1e3d; /* Dark Royal Blue */
     }
     /* Base styles */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Montserrat', sans-serif; overflow-x: hidden; color: #eee; }
+    body { font-family: 'Montserrat', sans-serif; overflow-x: hidden; color: #eee; background: transparent; }
     a, button { font-family: inherit; }
     /* Hero Section */
-    .hero { text-align: center; padding: 80px 20px; position: relative; }
+    .hero { text-align: center; padding: 80px 20px; }
     .hero h1 { font-size: 3rem; color: #ff6f61; margin-bottom: 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.7);} 
     .hero p { font-size: 1.2rem; color: #ddd; margin-bottom: 30px; }
     .cta-btn { background: #ff6f61; color: #fff; padding: 15px 30px; border: none; border-radius: 30px; cursor: pointer; font-size: 1rem; transition: transform 0.2s ease; }
     .cta-btn:hover { transform: scale(1.05); }
     /* Main Container */
-    .container { display: flex; flex-wrap: wrap; gap: 30px; max-width: 1200px; margin: -40px auto 60px; background: rgba(0, 0, 0, 0.8); border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
+    .container { display: flex; flex-wrap: wrap; gap: 30px; max-width: 1200px; margin: -40px auto 60px; background: rgba(11,30,61,0.85); border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     /* Form Panel */
     .form-panel { flex: 1 1 300px; min-width: 280px; }
     label { display: block; margin-top: 15px; color: #ccc; font-weight: 500; }
@@ -46,10 +46,18 @@
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     /* Result Panel */
     .result-panel { flex: 2 1 400px; min-width: 320px; max-height: 600px; overflow-y: auto; }
-    #chart svg, #chart img { width: 100%; border-radius: 8px; border: 2px solid #2e2e2e; margin-top: 20px; }
+    #chart {
+      margin-top: 20px;
+    }
+    #chart svg, #chart img {
+      width: 100%;
+      border-radius: 8px;
+      border: 2px solid #fff; /* White border for chart */
+      background-color: #fff; /* White background for chart */
+    }
     #result { margin-top: 20px; line-height: 1.6; color: #ddd; }
     /* Footer */
-    .footer { text-align: center; padding: 20px; color: #bbb; font-size: 0.9rem; position: relative; }
+    .footer { text-align: center; padding: 20px; color: #bbb; font-size: 0.9rem; }
     /* Responsive */
     @media (max-width: 768px) { .container { flex-direction: column; margin-top: -20px; } }
   </style>
@@ -103,56 +111,44 @@
     </div>
   </div>
 
-  <div class="footer">Designed by Abhishek Srivastava</div>
+  <div class="footer">Service provided by Palmology</div>
 
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.9.3/tsparticles.bundle.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Initialize AOS
       if (window.AOS) AOS.init({ duration: 800, once: true });
-      // Initialize tsParticles with starfield style
       if (window.tsParticles) {
         tsParticles.load('tsparticles', {
           fpsLimit: 60,
           particles: {
             number: { value: 100, density: { enable: true, area: 800 } },
-            color: { value: '#ffffff' },
+            color: { value: ['#ffffff', '#ffff00'] },
             shape: { type: 'star' },
-            opacity: { value: 0.5, random: true },
+            opacity: { value: 0.7, random: true },
             size: { value: { min: 1, max: 3 }, random: true },
-            move: { enable: true, speed: 0.3, direction: 'bottom', outModes: { default: 'out' } }
+            move: { enable: true, speed: 1.2, direction: 'bottom', outModes: { default: 'out' } }
           },
-          interactivity: {
-            events: { onHover: { enable: false }, onClick: { enable: false } }
-          },
+          interactivity: { events: { onHover: { enable: false }, onClick: { enable: false } } },
           detectRetina: true
         });
       } else console.error('tsParticles not loaded');
     });
 
     async function getPrediction() {
-      const spinner = document.getElementById('spinner');
-      spinner.style.display = 'inline-block';
-      document.getElementById('result').innerText = 'Generating prediction...';
-      document.getElementById('chart').innerHTML = '';
-      document.getElementById('downloadPdfBtn').style.display = 'none';
-
-      const dob = document.getElementById('dob').value;
-      const [year,month,day] = dob.split('-').map(Number);
-      const time = document.getElementById('time').value;
-      const [hour,minute] = time.split(':').map(Number);
+      const spinner = document.getElementById('spinner'); spinner.style.display = 'inline-block';
+      document.getElementById('result').innerText = 'Generating prediction...'; document.getElementById('chart').innerHTML = ''; document.getElementById('downloadPdfBtn').style.display = 'none';
+      const dob = document.getElementById('dob').value; const [year,month,day] = dob.split('-').map(Number);
+      const time = document.getElementById('time').value; const [hour,minute] = time.split(':').map(Number);
       const loc = document.getElementById('location').value;
       try {
         const geo = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(loc)}&key=15459e2a83eb42de9cd2b77a168c9307`);
-        const geoJson = await geo.json();
-        const { lat, lng } = geoJson.results[0].geometry;
-        const timezone = geoJson.results[0].annotations.timezone.offset_sec / 3600;
-        const payload = { name: document.getElementById('name').value, day, month, year, hour, minute, latitude: lat, longitude: lng, timezone, language: document.getElementById('language').value };
+        const geoJson = await geo.json(); const {lat,lng} = geoJson.results[0].geometry;
+        const timezone = geoJson.results[0].annotations.timezone.offset_sec/3600;
+        const payload = { name: document.getElementById('name').value, day,month,year,hour,minute,latitude:lat,longitude:lng,timezone,language:document.getElementById('language').value };
         const res = await fetch(`${window.location.origin}/predict`, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
-        const data = await res.json();
-        spinner.style.display = 'none';
+        const data = await res.json(); spinner.style.display = 'none';
         if (data.prediction) {
           document.getElementById('result').innerText = data.prediction;
           if (data.chartSvg) document.getElementById('chart').innerHTML = `<h5>Your Lagan Chart (D1)</h5><div>${data.chartSvg}</div>`;
@@ -161,9 +157,7 @@
           document.getElementById('result').innerText = 'Prediction failed. Try again.';
         }
       } catch (err) {
-        spinner.style.display = 'none';
-        document.getElementById('result').innerText = 'Error fetching prediction.';
-        console.error(err);
+        spinner.style.display = 'none'; document.getElementById('result').innerText = 'Error fetching prediction.'; console.error(err);
       }
     }
 
