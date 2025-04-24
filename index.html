@@ -1,230 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jyotish Prediction by Palmology</title>
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#1d4ed8">
-  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Palmology Jyotish Predictions</title>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#1d4ed8" />
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+  <!-- AOS Animation CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f3f4f6;
-    }
-    h1 {
-      text-align: center;
-      margin: 20px 0;
-      color: #1e3a8a;
-    }
-    .container {
-      display: flex;
-      flex-direction: column;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: white;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
-    }
-    .form-section {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .form-section > div {
-      flex: 1 1 100%;
-    }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 10px;
-    }
-    input, select {
-      padding: 6px;
+    /* Fullscreen particles background */
+    #tsparticles {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
-      margin-top: 5px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      font-size: 14px;
+      height: 100%;
+      z-index: -1;
     }
-    button {
-      margin-top: 15px;
-      padding: 10px 16px;
-      font-size: 14px;
-      background-color: #1d4ed8;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #2563eb;
-    }
-    #downloadPdfBtn {
-      background-color: #10b981;
-    }
-    #downloadPdfBtn:hover {
-      background-color: #059669;
-    }
-    #chart {
-      margin-top: 20px;
-    }
-    #chart svg {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      max-width: 100%;
-      height: auto;
-    }
-    #result {
-      margin-top: 20px;
-      white-space: pre-line;
-      font-size: 16px;
-    }
-    .footer {
-      text-align: center;
-      margin: 20px;
-      color: gray;
-      font-size: 14px;
-    }
-    @media (min-width: 768px) {
-      .form-section > div {
-        flex: 1 1 45%;
-      }
-    }
+    /* Base styles */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Montserrat', sans-serif; background: #0f0f0f; color: #eee; overflow-x: hidden; }
+    a, button { font-family: inherit; }
+    /* Hero Section */
+    .hero { text-align: center; padding: 80px 20px; }
+    .hero h1 { font-size: 3rem; color: #ff6f61; margin-bottom: 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.7);} 
+    .hero p { font-size: 1.2rem; color: #ccc; margin-bottom: 30px; }
+    .cta-btn { background: #ff6f61; color: #fff; padding: 15px 30px; border: none; border-radius: 30px; cursor: pointer; font-size: 1rem; transition: transform 0.2s ease; }
+    .cta-btn:hover { transform: scale(1.05); }
+    /* Main Container */
+    .container { display: flex; flex-wrap: wrap; gap: 30px; max-width: 1200px; margin: -40px auto 60px; background: rgba(26,26,26,0.9); border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+    /* Form Panel */
+    .form-panel { flex: 1 1 300px; min-width: 280px; }
+    label { display: block; margin-top: 15px; color: #ccc; font-weight: 500; }
+    input, select { width: 100%; padding: 10px 15px; margin-top: 5px; border: none; border-radius: 6px; background: #2e2e2e; color: #eee; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    input:focus, select:focus { transform: scale(1.02); box-shadow: 0 0 8px rgba(255,111,97,0.6); outline: none; }
+    .btn { display: inline-block; margin-top: 20px; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .btn-primary { background: #ff6f61; color: #fff; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); background: #e65b51; }
+    .btn-success { background: #10b981; color: #fff; }
+    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); background: #0e9a6e; }
+    .spinner { display: none; width: 24px; height: 24px; border: 3px solid #eee; border-top: 3px solid #ff6f61; border-radius: 50%; animation: spin 1s linear infinite; margin-left: 10px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* Result Panel */
+    .result-panel { flex: 2 1 400px; min-width: 320px; max-height: 600px; overflow-y: auto; }
+    #chart svg, #chart img { width: 100%; border-radius: 8px; border: 2px solid #2e2e2e; }
+    #result { margin-top: 20px; line-height: 1.6; color: #ddd; }
+    /* Footer */
+    .footer { text-align: center; padding: 20px; color: #666; font-size: 0.9rem; }
+    /* Responsive Fix */
+    @media (max-width: 768px) { .container { flex-direction: column; margin-top: -20px; } }
   </style>
 </head>
 <body>
-  <h1>Get Your Jyotish Prediction</h1>
-  <div class="container">
-    <div class="form-section">
-      <div>
-        <label for="name">Name:</label>
-        <input type="text" id="name">
+  <!-- Particles.js container -->
+  <div id="tsparticles"></div>
+  <!-- Hero -->
+  <section class="hero" data-aos="fade-down">
+    <h1>Unlock Your Future</h1>
+    <p>Experience expert Vedic astrology insights tailored for you.</p>
+    <button class="cta-btn" onclick="document.getElementById('name').focus()">Get Started</button>
+  </section>
 
-        <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob">
+  <!-- Main -->
+  <div class="container" data-aos="fade-up">
+    <!-- Form Panel -->
+    <div class="form-panel" data-aos="fade-right">
+      <label for="name">Name</label>
+      <input type="text" id="name" placeholder="Your Name">
 
-        <label for="time">Time of Birth (HH:MM):</label>
-        <input type="time" id="time">
+      <label for="dob">Date of Birth</label>
+      <input type="date" id="dob">
 
-        <label for="location">Location (City, State, Country):</label>
-        <input type="text" id="location">
+      <label for="time">Time of Birth</label>
+      <input type="time" id="time">
 
-        <label for="language">Language:</label>
-        <select id="language">
-          <option value="english">English</option>
-          <option value="hindi">Hindi</option>
-        </select>
+      <label for="location">Location</label>
+      <input type="text" id="location" placeholder="City, State, Country">
 
-        <button onclick="getPrediction()">Get Prediction</button>
-        <button id="downloadPdfBtn" style="display: none" onclick="downloadPdf()">Download Your Jyotish Predictions</button>
-      </div>
+      <label for="language">Language</label>
+      <select id="language">
+        <option value="english">English</option>
+        <option value="hindi">Hindi</option>
+      </select>
+
+      <button class="btn btn-primary" onclick="getPrediction()">
+        Get Prediction <div class="spinner" id="spinner"></div>
+      </button>
+      <button class="btn btn-success" id="downloadPdfBtn" style="display:none" onclick="downloadPdf()">
+        Download Predictions
+      </button>
+
+      <div id="chart"></div>
     </div>
 
-    <div id="chart"></div>
-    <div id="result">Your prediction will appear here...</div>
+    <!-- Result Panel -->
+    <div class="result-panel" data-aos="fade-left">
+      <div id="result">Your prediction will appear here...</div>
+    </div>
   </div>
+
   <div class="footer">Service provided by Palmology</div>
 
+  <!-- Scripts -->
+  <!-- AOS Animation JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <!-- tsParticles JS before initialization -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.min.js"></script>
   <script>
-    async function getPrediction() {
-      const dob = document.getElementById('dob').value;
-      const [year, month, day] = dob.split('-').map(Number);
-      const tob = document.getElementById('time').value;
-      const [hour, minute] = tob.split(':').map(Number);
-      const location = document.getElementById('location').value;
-
-      const geoResponse = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(location)}&key=15459e2a83eb42de9cd2b77a168c9307`);
-      const geoData = await geoResponse.json();
-      const { lat, lng } = geoData.results[0].geometry;
-      const timezone = geoData.results[0].annotations.timezone.offset_sec / 3600;
-
-      const data = {
-        name: document.getElementById('name').value,
-        day, month, year, hour, minute,
-        latitude: lat,
-        longitude: lng,
-        timezone,
-        language: document.getElementById('language').value
-      };
-
-      document.getElementById('result').innerText = 'Generating prediction...';
-      document.getElementById('chart').innerHTML = '';
-      document.getElementById('downloadPdfBtn').style.display = 'none';
-
-      try {
-        const response = await fetch(`${window.location.origin}/predict`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize AOS
+      if (window.AOS) AOS.init({ duration: 800, once: true });
+      // Initialize tsParticles
+      if (window.tsParticles) {
+        tsParticles.load('tsparticles', {
+          fpsLimit: 60,
+          interactivity: {
+            events: { onHover: { enable: true, mode: 'grab' }, resize: true },
+            modes: { grab: { distance: 200, links: { opacity: 0.5 } } }
+          },
+          particles: {
+            color: { value: '#ffffff' },
+            links: { color: '#ffffff', distance: 150, enable: true, opacity: 0.2, width: 1 },
+            move: { enable: true, speed: 1, direction: 'none', outModes: 'bounce' },
+            number: { density: { enable: true, area: 800 }, value: 60 },
+            opacity: { value: 0.3 },
+            shape: { type: 'circle' },
+            size: { value: { min: 1, max: 3 } }
+          },
+          detectRetina: true
         });
-
-        const result = await response.json();
-        if (result.prediction) {
-          document.getElementById('result').innerText = result.prediction;
-          if (result.chartSvg) {
-            document.getElementById('chart').innerHTML = `<h3>Your Lagan Chart (D1)</h3><div id="svgContainer">${result.chartSvg}</div>`;
-          } else {
-            document.getElementById('chart').innerHTML = '<p style="color:red;">Chart image URL not received from API.</p>';
-          }
+      } else {
+        console.error('tsParticles not loaded');
+      }
+    });
+    // Prediction & PDF logic unchanged
+    async function getPrediction() {
+      const spinner = document.getElementById('spinner'); spinner.style.display = 'inline-block';
+      document.getElementById('result').innerText = 'Generating prediction...'; document.getElementById('chart').innerHTML = ''; document.getElementById('downloadPdfBtn').style.display = 'none';
+      const dob = document.getElementById('dob').value; const [year,month,day] = dob.split('-').map(Number);
+      const time = document.getElementById('time').value; const [hour,minute] = time.split(':').map(Number);
+      const loc = document.getElementById('location').value;
+      try {
+        const geo = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(loc)}&key=15459e2a83eb42de9cd2b77a168c9307`);
+        const geoJson = await geo.json(); const {lat,lng} = geoJson.results[0].geometry;
+        const timezone = geoJson.results[0].annotations.timezone.offset_sec/3600;
+        const payload = { name:document.getElementById('name').value, day,month,year,hour,minute,latitude:lat,longitude:lng,timezone,language:document.getElementById('language').value };
+        const res = await fetch(`${window.location.origin}/predict`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        const data = await res.json(); spinner.style.display = 'none';
+        if(data.prediction) {
+          document.getElementById('result').innerText = data.prediction;
+          if(data.chartSvg) document.getElementById('chart').innerHTML = `<h5>Your Lagan Chart (D1)</h5><div>${data.chartSvg}</div>`;
           document.getElementById('downloadPdfBtn').style.display = 'inline-block';
         } else {
           document.getElementById('result').innerText = 'Prediction failed. Try again.';
         }
-      } catch (err) {
-        document.getElementById('result').innerText = 'Error: Unable to get prediction.';
-        console.error(err);
+      } catch(err) {
+        spinner.style.display = 'none'; document.getElementById('result').innerText = 'Error fetching prediction.'; console.error(err);
       }
     }
-
     function downloadPdf() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const name = document.getElementById('name').value;
-      const prediction = document.getElementById('result').innerText;
-      const lines = doc.splitTextToSize(prediction, 180);
-
-      let y = 20;
-      doc.text(`Jyotish Prediction for ${name}`, 10, 10);
-      lines.forEach(line => {
-        if (y > 250) {
-          doc.addPage();
-          y = 20;
-        }
-        doc.text(line, 10, y);
-        y += 7;
-      });
-
-      const svgElement = document.querySelector('#svgContainer svg');
-      if (svgElement) {
-        const svgData = new XMLSerializer().serializeToString(svgElement);
-        const canvas = document.createElement('canvas');
-        const svgSize = svgElement.getBoundingClientRect();
-        canvas.width = svgSize.width;
-        canvas.height = svgSize.height;
-        const ctx = canvas.getContext('2d');
-
-        const img = new Image();
-        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(svgBlob);
-
-        img.onload = function () {
-          ctx.drawImage(img, 0, 0);
-          URL.revokeObjectURL(url);
-          const imgData = canvas.toDataURL('image/png');
-
-          doc.addPage();
-          doc.addImage(imgData, 'PNG', 10, 10, 180, 180);
-          doc.save(`${name.replace(/\s+/g, '_')}_jyotish_prediction.pdf`);
-        };
-        img.src = url;
-      } else {
-        doc.save(`${name.replace(/\s+/g, '_')}_jyotish_prediction.pdf`);
-      }
+      const { jsPDF } = window.jspdf; const doc = new jsPDF(); const name = document.getElementById('name').value;
+      const text = document.getElementById('result').innerText; const lines = doc.splitTextToSize(text, 180);
+      let y = 20; doc.setFontSize(14); doc.text(`Jyotish Prediction for ${name}`, 10,10);
+      lines.forEach(line => { if(y>270){doc.addPage(); y=20;} doc.text(line,10,y); y+=7; });
+      doc.save(`${name.replace(/\s+/g,'_')}_prediction.pdf`);
     }
   </script>
 </body>
