@@ -8,11 +8,10 @@
   <meta name="theme-color" content="#1d4ed8">
   <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.standard_fonts_metrics.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.split_text_to_size.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.addimage.min.js"></script>
-
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
@@ -21,26 +20,35 @@
     }
     h1 {
       text-align: center;
-      margin: 20px 0;
+      margin: 20px 10px;
       color: #1e3a8a;
     }
     .container {
       display: flex;
+      flex-direction: column;
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
       background-color: white;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       border-radius: 10px;
-      gap: 20px;
     }
-    .left-panel {
-      width: 40%;
+    @media(min-width: 768px) {
+      .container {
+        flex-direction: row;
+        gap: 20px;
+      }
     }
-    .right-panel {
-      width: 60%;
-      overflow-y: auto;
-      max-height: 80vh;
+    .left-panel, .right-panel {
+      width: 100%;
+    }
+    @media(min-width: 768px) {
+      .left-panel {
+        width: 40%;
+      }
+      .right-panel {
+        width: 60%;
+      }
     }
     label {
       font-weight: bold;
@@ -77,10 +85,12 @@
     #chart {
       margin-top: 20px;
     }
-    #chart svg {
+    #chart svg, #chart img {
       border: 1px solid #ccc;
       border-radius: 8px;
       width: 100%;
+      max-width: 100%;
+      height: auto;
     }
     #result {
       margin-top: 20px;
@@ -121,124 +131,5 @@
     </div>
   </div>
   <div class="footer">Service provided by Palmology</div>
-
-  <script>
-    const hindiFont = 'NotoSansDevanagari';
-
-    (function loadFont() {
-      const fontUrl = 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts/hinted/ttf/NotoSansDevanagari/NotoSansDevanagari-Regular.ttf';
-      fetch(fontUrl)
-        .then(res => res.arrayBuffer())
-        .then(buffer => {
-          window.jspdf.jsPDF.API.events.push(['addFonts', function () {
-            this.addFileToVFS("NotoSansDevanagari-Regular.ttf", btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')));
-            this.addFont("NotoSansDevanagari-Regular.ttf", hindiFont, "normal");
-          }]);
-        });
-    })();
-
-    async function getPrediction() {
-      const dob = document.getElementById('dob').value;
-      const [year, month, day] = dob.split('-').map(Number);
-      const tob = document.getElementById('time').value;
-      const [hour, minute] = tob.split(':').map(Number);
-      const location = document.getElementById('location').value;
-      const geoResponse = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(location)}&key=15459e2a83eb42de9cd2b77a168c9307`);
-      const geoData = await geoResponse.json();
-      const { lat, lng } = geoData.results[0].geometry;
-      const timezone = geoData.results[0].annotations.timezone.offset_sec / 3600;
-
-      const data = {
-        name: document.getElementById('name').value,
-        day,
-        month,
-        year,
-        hour,
-        minute,
-        latitude: lat,
-        longitude: lng,
-        timezone,
-        language: document.getElementById('language').value
-      };
-
-      document.getElementById('result').innerText = 'Generating prediction...';
-      document.getElementById('chart').innerHTML = '';
-      document.getElementById('downloadPdfBtn').style.display = 'none';
-
-      try {
-        const response = await fetch(`${window.location.origin}/predict`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-        if (result.prediction) {
-          document.getElementById('result').innerText = result.prediction;
-          if (result.chartSvg) {
-            document.getElementById('chart').innerHTML = `<h3>Your Lagan Chart (D1)</h3><div id="svgContainer">${result.chartSvg}</div>`;
-          } else {
-            document.getElementById('chart').innerHTML = '<p style="color:red;">Chart image not received.</p>';
-          }
-          document.getElementById('downloadPdfBtn').style.display = 'inline-block';
-        } else {
-          document.getElementById('result').innerText = 'Prediction failed. Try again.';
-        }
-      } catch (err) {
-        document.getElementById('result').innerText = 'Error: Unable to get prediction.';
-        console.error(err);
-      }
-    }
-
-    function downloadPdf() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const name = document.getElementById('name').value;
-      const prediction = document.getElementById('result').innerText;
-      const language = document.getElementById('language').value;
-      const lines = doc.splitTextToSize(prediction, 180);
-
-      doc.setFont(language === "hindi" ? "NotoSansDevanagari" : "helvetica");
-      doc.setFontSize(12);
-      doc.text(`Jyotish Prediction for ${name}`, 10, 10);
-
-      let y = 20;
-      lines.forEach(line => {
-        if (y > 250) {
-          doc.addPage();
-          y = 20;
-        }
-        doc.text(line, 10, y);
-        y += 7;
-      });
-
-      const svgElement = document.querySelector('#svgContainer svg');
-      if (svgElement) {
-        const svgData = new XMLSerializer().serializeToString(svgElement);
-        const canvas = document.createElement('canvas');
-        const svgSize = svgElement.getBoundingClientRect();
-        canvas.width = svgSize.width;
-        canvas.height = svgSize.height;
-        const ctx = canvas.getContext('2d');
-
-        const img = new Image();
-        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(svgBlob);
-
-        img.onload = function () {
-          ctx.drawImage(img, 0, 0);
-          URL.revokeObjectURL(url);
-          const imgData = canvas.toDataURL('image/png');
-
-          doc.addPage();
-          doc.addImage(imgData, 'PNG', 10, 10, 180, 180);
-          doc.save(`${name.replace(/\s+/g, '_')}_jyotish_prediction.pdf`);
-        };
-        img.src = url;
-      } else {
-        doc.save(`${name.replace(/\s+/g, '_')}_jyotish_prediction.pdf`);
-      }
-    }
-  </script>
 </body>
 </html>
