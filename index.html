@@ -3,170 +3,227 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Palmology Jyotish Predictions</title>
+  <title>Palmology Jyotish Dashboard</title>
+  <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#0b1e3d" />
   <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-  <!-- AOS Animation CSS -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <!-- Lottie for loading animation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js" integrity="sha512-..." crossorigin="anonymous"></script>
+
+  <!-- tsparticles for background -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.9.3/tsparticles.bundle.min.js"></script>
+
   <style>
-    /* Particles.js canvas */
-    #tsparticles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      background: #0b1e3d; /* Dark Royal Blue */
-    }
-    /* Base styles */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Montserrat', sans-serif; overflow-x: hidden; color: #eee; background: transparent; }
-    a, button { font-family: inherit; }
-    /* Hero Section */
-    .hero { text-align: center; padding: 80px 20px; }
-    .hero h1 { font-size: 3rem; color: #ff6f61; margin-bottom: 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.7);} 
-    .hero p { font-size: 1.2rem; color: #ddd; margin-bottom: 30px; }
-    .cta-btn { background: #ff6f61; color: #fff; padding: 15px 30px; border: none; border-radius: 30px; cursor: pointer; font-size: 1rem; transition: transform 0.2s ease; }
-    .cta-btn:hover { transform: scale(1.05); }
-    /* Main Container */
-    .container { display: flex; flex-wrap: wrap; gap: 30px; max-width: 1200px; margin: -40px auto 60px; background: rgba(11,30,61,0.85); border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    /* Form Panel */
-    .form-panel { flex: 1 1 300px; min-width: 280px; }
-    label { display: block; margin-top: 15px; color: #ccc; font-weight: 500; }
-    input, select { width: 100%; padding: 10px 15px; margin-top: 5px; border: none; border-radius: 6px; background: #2e2e2e; color: #eee; transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    input:focus, select:focus { transform: scale(1.02); box-shadow: 0 0 8px rgba(255,111,97,0.6); outline: none; }
-    .btn { display: inline-block; margin-top: 20px; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    .btn-primary { background: #ff6f61; color: #fff; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); background: #e65b51; }
-    .btn-success { background: #10b981; color: #fff; }
-    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); background: #0e9a6e; }
-    .spinner { display: none; width: 24px; height: 24px; border: 3px solid #eee; border-top: 3px solid #ff6f61; border-radius: 50%; animation: spin 1s linear infinite; margin-left: 10px; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    /* Result Panel */
-    .result-panel { flex: 2 1 400px; min-width: 320px; max-height: 600px; overflow-y: auto; }
-    #chart {
-      margin-top: 20px;
-    }
-    #chart svg, #chart img {
-      width: 100%;
-      border-radius: 8px;
-      border: 2px solid #fff; /* White border for chart */
-      background-color: #fff; /* White background for chart */
-    }
-    #result { margin-top: 20px; line-height: 1.6; color: #ddd; }
+    /* Reset & base */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Montserrat',sans-serif; background:#0b1e3d; color:#eee; overflow-x:hidden; }
+    a, button { font-family:inherit; }
+    /* Full-screen particles bg */
+    #tsparticles { position:fixed; inset:0; z-index:-1; }
+    /* Auth & layout */
+    .container { max-width:480px; margin:0 auto; padding:20px; }
+    .hidden { display:none!important; }
+    h1 { text-align:center; margin:20px 0; color:#ff6f61; }
+    /* Buttons */
+    .btn { display:inline-block; width:100%; padding:12px; border:none; border-radius:6px; font-size:1rem; cursor:pointer; margin-top:15px; }
+    .btn-primary { background:#ff6f61; color:#fff; }
+    .btn-primary:hover { background:#e65b51; }
+    .btn-logout { background:#444; color:#fff; margin-top:10px; }
+    /* Form */
+    .form-group { margin-bottom:15px; }
+    label { display:block; margin-bottom:6px; color:#ccc; }
+    input, select { width:100%; padding:10px; border:none; border-radius:6px; background:#2e2e2e; color:#eee; }
+    input:focus, select:focus { outline:2px solid #ff6f61; }
+    /* Modal & tabs */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; z-index:10; }
+    .modal { background:#1e293b; border-radius:10px; width:90%; max-width:360px; max-height:80vh; overflow:hidden; }
+    .tab-header { display:flex; overflow-x:auto; background:#111827; }
+    .tab-header div { flex:1; padding:12px; text-align:center; cursor:pointer; white-space:nowrap; color:#ccc; }
+    .tab-header .active { background:#ff6f61; color:#fff; }
+    .tab-content { padding:15px; max-height:60vh; overflow-y:auto; }
+    /* Loading */
+    #loadingScreen { position:fixed; inset:0; background:#0b1e3d; display:flex; align-items:center; justify-content:center; z-index:20; }
     /* Footer */
-    .footer { text-align: center; padding: 20px; color: #bbb; font-size: 0.9rem; }
+    .footer { text-align:center; margin:30px 0 10px; color:#bbb; font-size:0.85rem; }
     /* Responsive */
-    @media (max-width: 768px) { .container { flex-direction: column; margin-top: -20px; } }
+    @media (max-width:480px) { .container { padding:15px; } h1 { font-size:1.5rem; } }
   </style>
 </head>
 <body>
-  <!-- Particles.js container -->
+  <!-- Particles Background -->
   <div id="tsparticles"></div>
 
-  <!-- Hero -->
-  <section class="hero" data-aos="fade-down">
-    <h1>Unlock Your Future</h1>
-    <p>Experience expert Vedic astrology insights tailored for you.</p>
-    <button class="cta-btn" onclick="document.getElementById('name').focus()">Get Started</button>
-  </section>
-
-  <!-- Main -->
-  <div class="container" data-aos="fade-up">
-    <!-- Form Panel -->
-    <div class="form-panel" data-aos="fade-right">
-      <label for="name">Name</label>
-      <input type="text" id="name" placeholder="Your Name">
-
-      <label for="dob">Date of Birth</label>
-      <input type="date" id="dob">
-
-      <label for="time">Time of Birth</label>
-      <input type="time" id="time">
-
-      <label for="location">Location</label>
-      <input type="text" id="location" placeholder="City, State, Country">
-
-      <label for="language">Language</label>
-      <select id="language">
-        <option value="english">English</option>
-        <option value="hindi">Hindi</option>
-      </select>
-
-      <button class="btn btn-primary" onclick="getPrediction()">
-        Get Prediction <div class="spinner" id="spinner"></div>
-      </button>
-      <button class="btn btn-success" id="downloadPdfBtn" style="display:none" onclick="downloadPdf()">
-        Download Predictions
-      </button>
-
-      <div id="chart"></div>
-    </div>
-
-    <!-- Result Panel -->
-    <div class="result-panel" data-aos="fade-left">
-      <div id="result">Your prediction will appear here...</div>
-    </div>
+  <!-- Loading Screen (6-10s) -->
+  <div id="loadingScreen">
+    <div id="lottieLoader" style="width:150px; height:150px;"></div>
   </div>
 
-  <div class="footer">Designed by Palmology</div>
+  <div class="container">
+    <h1>Palmology Jyotish</h1>
 
-  <!-- Scripts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.9.3/tsparticles.bundle.min.js"></script>
+    <!-- Authentication -->
+    <div id="authPanel">
+      <button class="btn btn-primary" id="googleSignInBtn">Sign in with Google</button>
+    </div>
+    <div id="userPanel" class="hidden">
+      <p>Welcome, <span id="userName"></span></p>
+      <button class="btn btn-logout" id="signOutBtn">Sign Out</button>
+    </div>
+
+    <!-- Birth Details Form -->
+    <div id="formPanel" class="hidden">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" placeholder="Your Name" />
+      </div>
+      <div class="form-group">
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob" />
+      </div>
+      <div class="form-group">
+        <label for="time">Time of Birth</label>
+        <input type="time" id="time" />
+      </div>
+      <div class="form-group">
+        <label for="location">Location</label>
+        <input type="text" id="location" placeholder="City, State, Country" />
+      </div>
+      <div class="form-group">
+        <label for="language">Language</label>
+        <select id="language">
+          <option value="english">English</option>
+          <option value="hindi">Hindi</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="submitBtn">Next</button>
+    </div>
+
+    <!-- Modal for D1 Chart & Prediction Tabs -->
+    <div id="reportModal" class="hidden">
+      <div class="modal-overlay">
+        <div class="modal">
+          <div class="tab-header">
+            <div id="tabChart" class="active">D1 Chart</div>
+            <div id="tabPrediction">Prediction</div>
+          </div>
+          <div class="tab-content" id="contentChart">
+            <p>Loading chart...</p>
+          </div>
+          <div class="tab-content hidden" id="contentPrediction">
+            <p>Loading prediction...</p>
+          </div>
+          <button class="btn btn-logout" id="closeModal">Close</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">Service provided by Palmology</div>
+
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      if (window.AOS) AOS.init({ duration: 800, once: true });
-      if (window.tsParticles) {
-        tsParticles.load('tsparticles', {
-          fpsLimit: 60,
-          particles: {
-            number: { value: 100, density: { enable: true, area: 800 } },
-            color: { value: ['#ffffff', '#ffff00'] },
-            shape: { type: 'star' },
-            opacity: { value: 0.7, random: true },
-            size: { value: { min: 1, max: 3 }, random: true },
-            move: { enable: true, speed: 1.2, direction: 'bottom', outModes: { default: 'out' } }
-          },
-          interactivity: { events: { onHover: { enable: false }, onClick: { enable: false } } },
-          detectRetina: true
-        });
-      } else console.error('tsParticles not loaded');
+    // Initialize PWA service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js');
+    }
+    // Initialize tsParticles
+    tsParticles.load('tsparticles', {
+      fpsLimit:60,
+      particles:{ number:{ value:80 }, color:{ value:['#ffffff','#ffff00'] }, shape:{ type:'star' }, opacity:{ value:0.6 }, size:{ value:{min:1,max:3} }, move:{ enable:true, speed:1.5 }
+      }
+    });
+    // Lottie loading
+    lottie.loadAnimation({ container: document.getElementById('lottieLoader'), renderer:'svg', loop:true, autoplay:true, path:'/animations/Animation-1745504213622.json' });
+    // Hide loading after max 10s
+    setTimeout(()=> document.getElementById('loadingScreen').remove(), 10000);
+
+    // Firebase config (replace with your config)
+    const firebaseConfig = { /* API_KEY, AUTH_DOMAIN, PROJECT_ID, ... */ };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Elements
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const userPanel = document.getElementById('userPanel');
+    const authPanel = document.getElementById('authPanel');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const userNameSpan = document.getElementById('userName');
+    const formPanel = document.getElementById('formPanel');
+    const submitBtn = document.getElementById('submitBtn');
+    const reportModal = document.getElementById('reportModal');
+    const closeModal = document.getElementById('closeModal');
+    const tabChart = document.getElementById('tabChart');
+    const tabPrediction = document.getElementById('tabPrediction');
+    const contentChart = document.getElementById('contentChart');
+    const contentPrediction = document.getElementById('contentPrediction');
+
+    // Auth flows
+    googleSignInBtn.onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    signOutBtn.onclick = () => auth.signOut();
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        authPanel.classList.add('hidden'); userPanel.classList.remove('hidden'); userNameSpan.innerText = user.displayName;
+        formPanel.classList.remove('hidden');
+      } else {
+        authPanel.classList.remove('hidden'); userPanel.classList.add('hidden'); formPanel.classList.add('hidden');
+      }
     });
 
-    async function getPrediction() {
-      const spinner = document.getElementById('spinner'); spinner.style.display = 'inline-block';
-      document.getElementById('result').innerText = 'Generating prediction...'; document.getElementById('chart').innerHTML = ''; document.getElementById('downloadPdfBtn').style.display = 'none';
-      const dob = document.getElementById('dob').value; const [year,month,day] = dob.split('-').map(Number);
-      const time = document.getElementById('time').value; const [hour,minute] = time.split(':').map(Number);
-      const loc = document.getElementById('location').value;
-      try {
-        const geo = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(loc)}&key=15459e2a83eb42de9cd2b77a168c9307`);
-        const geoJson = await geo.json(); const {lat,lng} = geoJson.results[0].geometry;
-        const timezone = geoJson.results[0].annotations.timezone.offset_sec/3600;
-        const payload = { name: document.getElementById('name').value, day,month,year,hour,minute,latitude:lat,longitude:lng,timezone,language:document.getElementById('language').value };
-        const res = await fetch(`${window.location.origin}/predict`, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
-        const data = await res.json(); spinner.style.display = 'none';
-        if (data.prediction) {
-          document.getElementById('result').innerText = data.prediction;
-          if (data.chartSvg) document.getElementById('chart').innerHTML = `<h5>Your Lagan Chart (D1)</h5><div>${data.chartSvg}</div>`;
-          document.getElementById('downloadPdfBtn').style.display = 'inline-block';
-        } else {
-          document.getElementById('result').innerText = 'Prediction failed. Try again.';
-        }
-      } catch (err) {
-        spinner.style.display = 'none'; document.getElementById('result').innerText = 'Error fetching prediction.'; console.error(err);
-      }
-    }
+    // Submit and open modal
+    submitBtn.onclick = async () => {
+      // Optionally save to Firestore
+      // await db.collection('profiles').doc(auth.currentUser.uid).set({ name, dob, time, ... });
+      reportModal.classList.remove('hidden');
+      loadChart();
+      loadPrediction();
+    };
+    closeModal.onclick = () => reportModal.classList.add('hidden');
 
-    function downloadPdf() {
-      const { jsPDF } = window.jspdf; const doc = new jsPDF(); const name = document.getElementById('name').value;
-      const text = document.getElementById('result').innerText; const lines = doc.splitTextToSize(text, 180);
-      let y = 20; doc.setFontSize(14); doc.text(`Jyotish Prediction for ${name}`, 10,10);
-      lines.forEach(line => { if (y > 270) { doc.addPage(); y = 20; } doc.text(line, 10, y); y += 7; });
-      doc.save(`${name.replace(/\s+/g,'_')}_prediction.pdf`);
+    // Tab switching
+    tabChart.onclick = () => {
+      tabChart.classList.add('active'); tabPrediction.classList.remove('active');
+      contentChart.classList.remove('hidden'); contentPrediction.classList.add('hidden');
+    };
+    tabPrediction.onclick = () => {
+      tabPrediction.classList.add('active'); tabChart.classList.remove('active');
+      contentPrediction.classList.remove('hidden'); contentChart.classList.add('hidden');
+    };
+
+    // Fetch chart
+    async function loadChart() {
+      contentChart.innerHTML = '<p>Loading chart...</p>';
+      try {
+        const res = await fetch(window.location.origin + '/predict-chart', { method:'POST', body: JSON.stringify(collectForm()) });
+        const data = await res.json();
+        contentChart.innerHTML = data.svg ? data.svg : '<p>Failed to load chart.</p>';
+      } catch { contentChart.innerHTML = '<p>Error loading chart.</p>'; }
+    }
+    // Fetch prediction
+    async function loadPrediction() {
+      contentPrediction.innerHTML = '<p>Loading prediction...</p>';
+      try {
+        const res = await fetch(window.location.origin + '/predict', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(collectForm()) });
+        const data = await res.json();
+        contentPrediction.innerText = data.prediction || 'Prediction unavailable.';
+      } catch { contentPrediction.innerHTML = '<p>Error loading prediction.</p>'; }
+    }
+    function collectForm() {
+      const dob = document.getElementById('dob').value.split('-').map(Number);
+      const time = document.getElementById('time').value.split(':').map(Number);
+      return {
+        name: document.getElementById('name').value,
+        day:dob[2], month:dob[1], year:dob[0],
+        hour:time[0], minute:time[1],
+        location:document.getElementById('location').value,
+        language:document.getElementById('language').value
+      };
     }
   </script>
 </body>
