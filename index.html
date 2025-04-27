@@ -15,7 +15,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
   <!-- Lottie for loading animation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js" integrity="sha512-..." crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js" crossorigin="anonymous"></script>
 
   <!-- tsparticles for background -->
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.9.3/tsparticles.bundle.min.js"></script>
@@ -79,29 +79,11 @@
 
     <!-- Birth Details Form -->
     <div id="formPanel" class="hidden">
-      <div class="form-group">
-        <label for="name">Name</label>
-        <input type="text" id="name" placeholder="Your Name" />
-      </div>
-      <div class="form-group">
-        <label for="dob">Date of Birth</label>
-        <input type="date" id="dob" />
-      </div>
-      <div class="form-group">
-        <label for="time">Time of Birth</label>
-        <input type="time" id="time" />
-      </div>
-      <div class="form-group">
-        <label for="location">Location</label>
-        <input type="text" id="location" placeholder="City, State, Country" />
-      </div>
-      <div class="form-group">
-        <label for="language">Language</label>
-        <select id="language">
-          <option value="english">English</option>
-          <option value="hindi">Hindi</option>
-        </select>
-      </div>
+      <div class="form-group"><label for="name">Name</label><input type="text" id="name" placeholder="Your Name" /></div>
+      <div class="form-group"><label for="dob">Date of Birth</label><input type="date" id="dob" /></div>
+      <div class="form-group"><label for="time">Time of Birth</label><input type="time" id="time" /></div>
+      <div class="form-group"><label for="location">Location</label><input type="text" id="location" placeholder="City, State, Country" /></div>
+      <div class="form-group"><label for="language">Language</label><select id="language"><option value="english">English</option><option value="hindi">Hindi</option></select></div>
       <button class="btn btn-primary" id="submitBtn">Next</button>
     </div>
 
@@ -129,25 +111,23 @@
 
   <script>
     // Initialize PWA service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js');
-    }
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');
+
     // Initialize tsParticles
     tsParticles.load('tsparticles', {
       fpsLimit:60,
       particles:{ number:{ value:80 }, color:{ value:['#ffffff','#ffff00'] }, shape:{ type:'star' }, opacity:{ value:0.6 }, size:{ value:{min:1,max:3} }, move:{ enable:true, speed:1.5 }
       }
     });
+
     // Lottie loading
     lottie.loadAnimation({ container: document.getElementById('lottieLoader'), renderer:'svg', loop:true, autoplay:true, path:'/animations/Animation-1745504213622.json' });
-    // Hide loading after max 10s
     setTimeout(()=> document.getElementById('loadingScreen').remove(), 10000);
 
     // Firebase config (replace with your config)
-    const firebaseConfig = { /* API_KEY, AUTH_DOMAIN, PROJECT_ID, ... */ };
+    const firebaseConfig = { /* your config here */ };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore();
 
     // Elements
     const googleSignInBtn = document.getElementById('googleSignInBtn');
@@ -176,53 +156,46 @@
       }
     });
 
-    // Submit and open modal
+    // Show modal and fetch both chart and prediction in one call
     submitBtn.onclick = async () => {
-      // Optionally save to Firestore
-      // await db.collection('profiles').doc(auth.currentUser.uid).set({ name, dob, time, ... });
       reportModal.classList.remove('hidden');
-      loadChart();
-      loadPrediction();
-    };
-    closeModal.onclick = () => reportModal.classList.add('hidden');
-
-    // Tab switching
-    tabChart.onclick = () => {
-      tabChart.classList.add('active'); tabPrediction.classList.remove('active');
-      contentChart.classList.remove('hidden'); contentPrediction.classList.add('hidden');
-    };
-    tabPrediction.onclick = () => {
-      tabPrediction.classList.add('active'); tabChart.classList.remove('active');
-      contentPrediction.classList.remove('hidden'); contentChart.classList.add('hidden');
-    };
-
-    // Fetch chart
-    async function loadChart() {
+      // show loaders
       contentChart.innerHTML = '<p>Loading chart...</p>';
-      try {
-        const res = await fetch(window.location.origin + '/predict-chart', { method:'POST', body: JSON.stringify(collectForm()) });
-        const data = await res.json();
-        contentChart.innerHTML = data.svg ? data.svg : '<p>Failed to load chart.</p>';
-      } catch { contentChart.innerHTML = '<p>Error loading chart.</p>'; }
-    }
-    // Fetch prediction
-    async function loadPrediction() {
       contentPrediction.innerHTML = '<p>Loading prediction...</p>';
+
       try {
-        const res = await fetch(window.location.origin + '/predict', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(collectForm()) });
+        const payload = collectForm();
+        const res = await fetch(window.location.origin + '/predict', {
+          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(`Status ${res.status}`);
         const data = await res.json();
-        contentPrediction.innerText = data.prediction || 'Prediction unavailable.';
-      } catch { contentPrediction.innerHTML = '<p>Error loading prediction.</p>'; }
-    }
+        // Chart
+        if (data.chartSvg) contentChart.innerHTML = data.chartSvg;
+        else contentChart.innerHTML = '<p>No chart data returned.</p>';
+        // Prediction
+        if (data.prediction) contentPrediction.innerText = data.prediction;
+        else contentPrediction.innerText = 'No prediction returned.';
+      } catch(err) {
+        contentChart.innerHTML = '<p>Error loading chart.</p>';
+        contentPrediction.innerHTML = '<p>Error loading prediction.</p>';
+        console.error('Fetch error:', err);
+      }
+    };
+
+    closeModal.onclick = () => reportModal.classList.add('hidden');
+    tabChart.onclick = () => { tabChart.classList.add('active'); tabPrediction.classList.remove('active'); contentChart.classList.remove('hidden'); contentPrediction.classList.add('hidden'); };
+    tabPrediction.onclick = () => { tabPrediction.classList.add('active'); tabChart.classList.remove('active'); contentPrediction.classList.remove('hidden'); contentChart.classList.add('hidden'); };
+
     function collectForm() {
       const dob = document.getElementById('dob').value.split('-').map(Number);
       const time = document.getElementById('time').value.split(':').map(Number);
       return {
         name: document.getElementById('name').value,
-        day:dob[2], month:dob[1], year:dob[0],
-        hour:time[0], minute:time[1],
-        location:document.getElementById('location').value,
-        language:document.getElementById('language').value
+        day: dob[2], month: dob[1], year: dob[0],
+        hour: time[0], minute: time[1],
+        location: document.getElementById('location').value,
+        language: document.getElementById('language').value
       };
     }
   </script>
