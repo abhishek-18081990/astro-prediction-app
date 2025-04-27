@@ -2,69 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Palmology Jyotish Predictions</title>
-  <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="#0b1e3d"/>
-  <link rel="apple-touch-icon" href="/icons/icon-192x192.png"/>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#0b1e3d" />
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
   <!-- AOS Animation CSS -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
   <style>
-    /* hide native scrollbar */
-    .tabs-wrapper .tabs {
-      display: flex;
-      overflow-x: auto;
-      white-space: nowrap;
-      scrollbar-width: none;       /* Firefox */
-      -ms-overflow-style: none;    /* IE 10+ */
+    /* Particles.js canvas */
+    #tsparticles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0b1e3d; /* Dark Royal Blue */
     }
-    .tabs-wrapper .tabs::-webkit-scrollbar {
-      display: none;               /* Safari/WebKit */
+    /* Base styles */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Montserrat', sans-serif; overflow-x: hidden; color: #eee; background: transparent; }
+    a, button { font-family: inherit; }
+    /* Hero Section */
+    .hero { text-align: center; padding: 80px 20px; }
+    .hero h1 { font-size: 3rem; color: #ff6f61; margin-bottom: 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.7);} 
+    .hero p { font-size: 1.2rem; color: #ddd; margin-bottom: 30px; }
+    .cta-btn { background: #ff6f61; color: #fff; padding: 15px 30px; border: none; border-radius: 30px; cursor: pointer; font-size: 1rem; transition: transform 0.2s ease; }
+    .cta-btn:hover { transform: scale(1.05); }
+    /* Main Container */
+    .container { display: flex; flex-wrap: wrap; gap: 30px; max-width: 1200px; margin: -40px auto 60px; background: rgba(11,30,61,0.85); border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    /* Form Panel */
+    .form-panel { flex: 1 1 300px; min-width: 280px; }
+    label { display: block; margin-top: 15px; color: #ccc; font-weight: 500; }
+    input, select { width: 100%; padding: 10px 15px; margin-top: 5px; border: none; border-radius: 6px; background: #2e2e2e; color: #eee; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    input:focus, select:focus { transform: scale(1.02); box-shadow: 0 0 8px rgba(255,111,97,0.6); outline: none; }
+    .btn { display: inline-block; margin-top: 20px; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .btn-primary { background: #ff6f61; color: #fff; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); background: #e65b51; }
+    .btn-success { background: #10b981; color: #fff; }
+    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); background: #0e9a6e; }
+    .spinner { display: none; width: 24px; height: 24px; border: 3px solid #eee; border-top: 3px solid #ff6f61; border-radius: 50%; animation: spin 1s linear infinite; margin-left: 10px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* Result Panel */
+    .result-panel { flex: 2 1 400px; min-width: 320px; max-height: 600px; overflow-y: auto; }
+    #chart {
+      margin-top: 20px;
     }
-
-    /* Tabs wrapper styling */
-    .tabs-wrapper {
-      border-bottom: 2px solid rgba(255,255,255,0.2);
-      margin: 20px 0;
+    #chart svg, #chart img {
+      width: 100%;
+      border-radius: 8px;
+      border: 2px solid #fff; /* White border for chart */
+      background-color: #fff; /* White background for chart */
     }
-
-    /* Individual tab pills */
-    .tabs-wrapper .tab {
-      flex: 0 0 auto;
-      padding: 8px 16px;
-      margin-right: 8px;
-      background: #2c3e50;
-      color: #ecf0f1;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
-      font-size: 0.9rem;
-      user-select: none;
-    }
-    .tabs-wrapper .tab:hover {
-      background: #34495e;
-    }
-    .tabs-wrapper .tab.active {
-      background: #e67e22;
-      color: #fff;
-    }
-
-    /* rest of your existing CSS… */
-    /* Particles.js container */
-    #tsparticles { position: fixed; top:0;left:0;width:100%;height:100%;z-index:-1;background:#0b1e3d; }
-
-    * { box-sizing: border-box; margin:0; padding:0; }
-    body {
-      font-family: 'Montserrat', sans-serif;
-      overflow-x: hidden;
-      color: #eee;
-      background: transparent;
-    }
-    /* … etc (your form-panel, result-panel, buttons, spinner, etc.) */
+    #result { margin-top: 20px; line-height: 1.6; color: #ddd; }
+    /* Footer */
+    .footer { text-align: center; padding: 20px; color: #bbb; font-size: 0.9rem; }
+    /* Responsive */
+    @media (max-width: 768px) { .container { flex-direction: column; margin-top: -20px; } }
   </style>
 </head>
 <body>
-  <!-- Particles.js -->
+  <!-- Particles.js container -->
   <div id="tsparticles"></div>
 
   <!-- Hero -->
@@ -74,74 +73,101 @@
     <button class="cta-btn" onclick="document.getElementById('name').focus()">Get Started</button>
   </section>
 
-  <!-- Main Container -->
+  <!-- Main -->
   <div class="container" data-aos="fade-up">
     <!-- Form Panel -->
     <div class="form-panel" data-aos="fade-right">
-      <!-- … your birth-details form … -->
+      <label for="name">Name</label>
+      <input type="text" id="name" placeholder="Your Name">
+
+      <label for="dob">Date of Birth</label>
+      <input type="date" id="dob">
+
+      <label for="time">Time of Birth</label>
+      <input type="time" id="time">
+
+      <label for="location">Location</label>
+      <input type="text" id="location" placeholder="City, State, Country">
+
+      <label for="language">Language</label>
+      <select id="language">
+        <option value="english">English</option>
+        <option value="hindi">Hindi</option>
+      </select>
+
       <button class="btn btn-primary" onclick="getPrediction()">
         Get Prediction <div class="spinner" id="spinner"></div>
       </button>
       <button class="btn btn-success" id="downloadPdfBtn" style="display:none" onclick="downloadPdf()">
         Download Predictions
       </button>
+
+      <div id="chart"></div>
     </div>
 
     <!-- Result Panel -->
     <div class="result-panel" data-aos="fade-left">
-      <!-- TABS -->
-      <div class="tabs-wrapper">
-        <ul class="tabs">
-          <li class="tab active" data-tab="D1">D1 Chart</li>
-          <li class="tab" data-tab="D9">D9 Chart</li>
-          <li class="tab" data-tab="D2">D2 Chart</li>
-          <li class="tab" data-tab="D3">D3 Chart</li>
-          <li class="tab" data-tab="D7">D7 Chart</li>
-          <li class="tab" data-tab="D12">D12 Chart</li>
-          <li class="tab" data-tab="D30">D30 Chart</li>
-          <li class="tab" data-tab="Mahadasha">Mahadasha</li>
-          <li class="tab" data-tab="Chalit">Chalit Kundli</li>
-          <li class="tab" data-tab="Life">Life Report</li>
-        </ul>
-      </div>
-
-      <!-- CONTENT PANELS (one per tab) -->
-      <div id="content-D1" class="tab-content">Your D1 chart will render here…</div>
-      <div id="content-D9" class="tab-content" style="display:none">Your D9 chart will render here…</div>
-      <!-- … similarly for D2, D3, D7, etc. … -->
-
-      <div id="result">Your prediction will appear here…</div>
-      <div id="chart"></div>
+      <div id="result">Your prediction will appear here...</div>
     </div>
   </div>
 
   <div class="footer">Designed by Palmology</div>
 
-  <!-- JS -->
+  <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.9.3/tsparticles.bundle.min.js"></script>
   <script>
-    // initialize AOS & particles…
     document.addEventListener('DOMContentLoaded', () => {
-      AOS.init({ duration:800, once:true });
-      tsParticles.load('tsparticles', {/* … your config … */});
+      if (window.AOS) AOS.init({ duration: 800, once: true });
+      if (window.tsParticles) {
+        tsParticles.load('tsparticles', {
+          fpsLimit: 60,
+          particles: {
+            number: { value: 100, density: { enable: true, area: 800 } },
+            color: { value: ['#ffffff', '#ffff00'] },
+            shape: { type: 'star' },
+            opacity: { value: 0.7, random: true },
+            size: { value: { min: 1, max: 3 }, random: true },
+            move: { enable: true, speed: 1.2, direction: 'bottom', outModes: { default: 'out' } }
+          },
+          interactivity: { events: { onHover: { enable: false }, onClick: { enable: false } } },
+          detectRetina: true
+        });
+      } else console.error('tsParticles not loaded');
     });
 
-    // TAB SWITCHING LOGIC
-    document.querySelectorAll('.tabs .tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        // deactivate all tabs
-        document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
-        // hide all panels
-        document.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');
-        // activate clicked
-        tab.classList.add('active');
-        // show its panel
-        document.getElementById('content-'+tab.dataset.tab).style.display = 'block';
-      });
-    });
+    async function getPrediction() {
+      const spinner = document.getElementById('spinner'); spinner.style.display = 'inline-block';
+      document.getElementById('result').innerText = 'Generating prediction...'; document.getElementById('chart').innerHTML = ''; document.getElementById('downloadPdfBtn').style.display = 'none';
+      const dob = document.getElementById('dob').value; const [year,month,day] = dob.split('-').map(Number);
+      const time = document.getElementById('time').value; const [hour,minute] = time.split(':').map(Number);
+      const loc = document.getElementById('location').value;
+      try {
+        const geo = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(loc)}&key=15459e2a83eb42de9cd2b77a168c9307`);
+        const geoJson = await geo.json(); const {lat,lng} = geoJson.results[0].geometry;
+        const timezone = geoJson.results[0].annotations.timezone.offset_sec/3600;
+        const payload = { name: document.getElementById('name').value, day,month,year,hour,minute,latitude:lat,longitude:lng,timezone,language:document.getElementById('language').value };
+        const res = await fetch(`${window.location.origin}/predict`, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json(); spinner.style.display = 'none';
+        if (data.prediction) {
+          document.getElementById('result').innerText = data.prediction;
+          if (data.chartSvg) document.getElementById('chart').innerHTML = `<h5>Your Lagan Chart (D1)</h5><div>${data.chartSvg}</div>`;
+          document.getElementById('downloadPdfBtn').style.display = 'inline-block';
+        } else {
+          document.getElementById('result').innerText = 'Prediction failed. Try again.';
+        }
+      } catch (err) {
+        spinner.style.display = 'none'; document.getElementById('result').innerText = 'Error fetching prediction.'; console.error(err);
+      }
+    }
 
-    // YOUR existing getPrediction() and downloadPdf() here…
+    function downloadPdf() {
+      const { jsPDF } = window.jspdf; const doc = new jsPDF(); const name = document.getElementById('name').value;
+      const text = document.getElementById('result').innerText; const lines = doc.splitTextToSize(text, 180);
+      let y = 20; doc.setFontSize(14); doc.text(`Jyotish Prediction for ${name}`, 10,10);
+      lines.forEach(line => { if (y > 270) { doc.addPage(); y = 20; } doc.text(line, 10, y); y += 7; });
+      doc.save(`${name.replace(/\s+/g,'_')}_prediction.pdf`);
+    }
   </script>
 </body>
 </html>
