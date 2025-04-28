@@ -65,9 +65,12 @@
       animation:spin 1s linear infinite;
     }
     @keyframes spin { to{transform:rotate(360deg)} }
-    #chart, #result { max-width:600px; margin:20px auto; }
+    #chart, #result {
+      max-width:600px; margin:20px auto;
+      background:#fff; color:#000; padding:20px; border-radius:8px;
+    }
     #chart img, #chart svg {
-      width:100%; border-radius:8px; background:#fff; border:2px solid #fff;
+      width:100%; border-radius:8px;
     }
   </style>
 </head>
@@ -107,71 +110,79 @@
     </div>
   </form>
 
-  <div id="chart"></div>
-  <div id="result">Your prediction will appear here...</div>
+  <!-- Wrap content-to-be-pdf’d in a container -->
+  <div id="pdfContent">
+    <div id="chart"></div>
+    <div id="result">Your prediction will appear here...</div>
+  </div>
   <button id="downloadPdfBtn" class="btn btn-success" style="display:none">
     Download Predictions
   </button>
 
-  <!-- scripts -->
+  <!-- external scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.9.3/tsparticles.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <script>
     const form = document.getElementById('prediction-form');
     const getBtn = document.getElementById('getPredictionBtn');
     const spinner = document.getElementById('spinner');
     const remember = document.getElementById('rememberMe');
     const datalist = document.getElementById('location-list');
+    const downloadBtn = document.getElementById('downloadPdfBtn');
     const OC_KEY = '15459e2a83eb42de9cd2b77a168c9307';
 
-    //--- Initialize AOS & tsParticles
-    document.addEventListener('DOMContentLoaded',()=>{
-      AOS?.init({duration:800,once:true});
-      if(window.tsParticles){
-        tsParticles.load('tsparticles',{ fpsLimit:60, particles:{number:{value:80},color:{value:['#fff','#ff0']},shape:{type:'star'},opacity:{value:0.7,random:true},size:{value:{min:1,max:3},random:true},move:{enable:true,speed:1.2,direction:'bottom',outModes:{default:'out'}}},detectRetina:true});
-      }
-      // load saved
-      if(localStorage.getItem('remember')==='yes'){
-        ['name','dob','time','location','language'].forEach(id=>{
-          const v = localStorage.getItem(id);
-          if(v) document.getElementById(id).value=v;
+    document.addEventListener('DOMContentLoaded', () => {
+      AOS?.init({ duration:800, once:true });
+      if (window.tsParticles) {
+        tsParticles.load('tsparticles', {
+          fpsLimit:60,
+          particles:{ number:{value:80}, color:{value:['#fff','#ff0']}, shape:{type:'star'},
+          opacity:{value:0.7,random:true}, size:{value:{min:1,max:3},random:true},
+          move:{enable:true,speed:1.2,direction:'bottom',outModes:{default:'out'}} },
+          detectRetina:true
         });
-        remember.checked=true;
+      }
+      // restore remembered
+      if (localStorage.getItem('remember')==='yes') {
+        ['name','dob','time','location','language'].forEach(id => {
+          const v = localStorage.getItem(id);
+          if (v) document.getElementById(id).value = v;
+        });
+        remember.checked = true;
       }
       validateForm();
     });
 
-    //--- Validation & enabling button
-    form.addEventListener('input',validateForm);
-    function validateForm(){
+    form.addEventListener('input', validateForm);
+    function validateForm() {
       getBtn.disabled = !form.checkValidity();
     }
 
-    //--- Remember Me
-    remember.addEventListener('change',()=>{
+    // remember-me logic
+    remember.addEventListener('change', () => {
       localStorage.setItem('remember', remember.checked?'yes':'no');
-      if(!remember.checked){
-        ['name','dob','time','location','language'].forEach(id=>localStorage.removeItem(id));
+      if (!remember.checked) {
+        ['name','dob','time','location','language'].forEach(id => localStorage.removeItem(id));
       }
     });
-    // save on change if remembering
-    ['name','dob','time','location','language'].forEach(id=>{
-      document.getElementById(id).addEventListener('change',e=>{
-        if(remember.checked) localStorage.setItem(id, e.target.value);
+    ['name','dob','time','location','language'].forEach(id => {
+      document.getElementById(id).addEventListener('change', e => {
+        if (remember.checked) localStorage.setItem(id, e.target.value);
       });
     });
 
-    //--- Debounced Location Autocomplete (India only)
+    // autocomplete India only
     let locTimer;
-    document.getElementById('location').addEventListener('input', e=>{
+    document.getElementById('location').addEventListener('input', e => {
       clearTimeout(locTimer);
       const q = e.target.value.trim();
-      if(q.length<3) return;
-      locTimer = setTimeout(async ()=>{
+      if (q.length < 3) return;
+      locTimer = setTimeout(async () => {
         const res = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(q)}&countrycode=IN&limit=5&key=${OC_KEY}`);
         const js = await res.json();
         datalist.innerHTML = '';
-        js.results?.forEach(r=>{
+        js.results?.forEach(r => {
           const opt = document.createElement('option');
           opt.value = r.formatted;
           datalist.appendChild(opt);
@@ -179,72 +190,70 @@
       }, 300);
     });
 
-    //--- Submit & fetch prediction
-    form.addEventListener('submit', async e=>{
+    // form submit
+    form.addEventListener('submit', async e => {
       e.preventDefault();
-      spinner.style.display='inline-block';
-      getBtn.disabled=true;
-      document.getElementById('result').innerText='Generating prediction...';
-      document.getElementById('chart').innerHTML='';
-      document.getElementById('downloadPdfBtn').style.display='none';
+      spinner.style.display = 'inline-block';
+      getBtn.disabled = true;
+      downloadBtn.style.display = 'none';
+      document.getElementById('result').innerText = 'Generating prediction...';
+      document.getElementById('chart').innerHTML = '';
 
-      // parse fields
+      // parse
       const [year,mo,da] = document.getElementById('dob').value.split('-').map(Number);
       const [hr,mi]   = document.getElementById('time').value.split(':').map(Number);
-      // geocode first to get lat/lng/timezone
-      try{
+
+      try {
+        // geocode
         const geoRes = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(document.getElementById('location').value)}&countrycode=IN&limit=1&key=${OC_KEY}`);
         const geoJson = await geoRes.json();
-        if(!geoJson.results?.length) throw new Error('No location found');
-        const {lat,lng} = geoJson.results[0].geometry;
+        if (!geoJson.results?.length) throw new Error('No location found');
+        const { lat, lng } = geoJson.results[0].geometry;
         const tz = geoJson.results[0].annotations.timezone.offset_sec/3600;
 
-        // send to your backend
         const payload = {
-          name: document.getElementById('name').value,
-          day:da, month:mo, year, hour:hr, minute:mi,
-          latitude:lat, longitude:lng, timezone:tz,
-          language: document.getElementById('language').value
+          name:       document.getElementById('name').value,
+          day:        da, month: mo, year,
+          hour:       hr, minute: mi,
+          latitude:   lat, longitude: lng, timezone: tz,
+          language:   document.getElementById('language').value
         };
-        const resp = await fetch(`${window.location.origin}/predict`,{
+
+        const resp = await fetch(`${window.location.origin}/predict`, {
           method:'POST',
-          headers:{'Content-Type':'application/json'},
+          headers:{ 'Content-Type':'application/json' },
           body: JSON.stringify(payload)
         });
         const data = await resp.json();
-        spinner.style.display='none';
-        if(data.prediction){
+        spinner.style.display = 'none';
+
+        if (data.prediction) {
           document.getElementById('result').innerText = data.prediction;
-          if(data.chartSvg){
+          if (data.chartSvg) {
             document.getElementById('chart').innerHTML = `<h5>Your Lagan Chart (D1)</h5><div>${data.chartSvg}</div>`;
           }
-          document.getElementById('downloadPdfBtn').style.display='inline-block';
+          downloadBtn.style.display = 'inline-block';
         } else {
-          document.getElementById('result').innerText='Prediction failed. Try again.';
+          document.getElementById('result').innerText = 'Prediction failed. Try again.';
         }
-      }catch(err){
-        spinner.style.display='none';
-        document.getElementById('result').innerText = 'Error: '+ err.message;
+      } catch(err) {
+        spinner.style.display = 'none';
+        document.getElementById('result').innerText = 'Error: ' + err.message;
         console.error(err);
       } finally {
         getBtn.disabled = false;
       }
     });
 
-    //--- PDF Download (unchanged)
-    document.getElementById('downloadPdfBtn').addEventListener('click',()=>{
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const name = document.getElementById('name').value;
-      const text = document.getElementById('result').innerText;
-      const lines = doc.splitTextToSize(text,180);
-      let y =20;
-      doc.text(`Jyotish Prediction for ${name}`,10,10);
-      lines.forEach(line=>{
-        if(y>270){ doc.addPage(); y=20; }
-        doc.text(line,10,y); y+=7;
-      });
-      doc.save(`${name.replace(/\s+/g,'_')}_prediction.pdf`);
+    // download via html2pdf
+    downloadBtn.addEventListener('click', () => {
+      const element = document.getElementById('pdfContent');
+      html2pdf().from(element).set({
+        margin:       0.5,
+        filename:     `${document.getElementById('name').value.replace(/\s+/g,'_')}_prediction.pdf`,
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+      }).save();
     });
   </script>
 </body>
