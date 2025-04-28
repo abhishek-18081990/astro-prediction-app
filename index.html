@@ -10,170 +10,177 @@
   <!-- AOS Animation CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
   <style>
-    /* Particles.js canvas */
-    #tsparticles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: #0b1e3d; }
-    /* Base styles */
+    /* Base resets */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Montserrat', sans-serif; overflow-x: hidden; color: #eee; background: transparent; }
-    a, button { font-family: inherit; }
-    /* Hero Section */
-    .hero { text-align: center; padding: 80px 20px; }
-    .hero h1 { font-size: 3rem; color: #ff6f61; margin-bottom: 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.7);} 
-    .hero p { font-size: 1.2rem; color: #ddd; margin-bottom: 30px; }
-    .cta-btn { background: #ff6f61; color: #fff; padding: 15px 30px; border: none; border-radius: 30px; cursor: pointer; font-size: 1rem; transition: transform 0.2s ease; }
-    .cta-btn:hover { transform: scale(1.05); }
-    /* Main Container */
-    .container { display: flex; flex-wrap: wrap; gap: 30px; max-width: 1200px; margin: -40px auto 60px; background: rgba(11,30,61,0.85); border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    /* Form Panel */
-    .form-panel { flex: 1 1 300px; min-width: 280px; }
-    label { display: block; margin-top: 15px; color: #ccc; font-weight: 500; }
-    input, select { width: 100%; padding: 10px 15px; margin-top: 5px; border: none; border-radius: 6px; background: #2e2e2e; color: #eee; transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    input:focus, select:focus { transform: scale(1.02); box-shadow: 0 0 8px rgba(255,111,97,0.6); outline: none; }
-    input.invalid { border: 2px solid #ef4444; }
-    .btn { display: inline-block; margin-top: 20px; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    .btn-primary { background: #ff6f61; color: #fff; }
-    .btn-primary:disabled { background: #888; cursor: not-allowed; }
-    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); background: #e65b51; }
-    .btn-success { background: #10b981; color: #fff; }
-    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); background: #0e9a6e; }
-    .spinner { display: none; width: 24px; height: 24px; border: 3px solid #eee; border-top: 3px solid #ff6f61; border-radius: 50%; animation: spin 1s linear infinite; margin-left: 10px; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    /* Autocomplete dropdown */
-    .autocomplete { position: relative; }
-    .autocomplete-items { position: absolute; top: 100%; left: 0; right: 0; background: #2e2e2e; border-radius: 6px; max-height: 200px; overflow-y: auto; z-index: 10; }
-    .autocomplete-item { padding: 8px 12px; cursor: pointer; color: #eee; }
+    body { font-family: 'Montserrat', sans-serif; background: #0b1e3d; color: #eee; overflow-x: hidden; }
+
+    /* Validation styling */
+    input:invalid, select:invalid {
+      border: 2px solid #e53e3e;
+    }
+    input:valid, select:valid {
+      border: 1px solid #ccc;
+    }
+
+    /* Container styling */
+    .container { max-width: 1200px; margin: 40px auto; padding: 20px; background: rgba(11,30,61,0.85); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    h1 { text-align: center; font-size: 2rem; margin-bottom: 20px; color: #ff6f61; }
+    label { display: block; margin-top: 15px; font-weight: 500; color: #ccc; }
+    input, select, button { font-family: inherit; }
+    input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; background: #2e2e2e; color: #eee; border: 1px solid #ccc; }
+    .autocomplete-list { position: relative; }
+    .autocomplete-items { position: absolute; top: 100%; left: 0; right: 0; background: #2e2e2e; border: 1px solid #444; max-height: 150px; overflow-y: auto; z-index: 10; }
+    .autocomplete-item { padding: 8px; cursor: pointer; }
     .autocomplete-item:hover { background: #444; }
-    /* Result Panel */
-    .result-panel { flex: 2 1 400px; min-width: 320px; max-height: 600px; overflow-y: auto; }
-    #chart { margin-top: 20px; }
-    #chart svg, #chart img { width: 100%; border-radius: 8px; border: 2px solid #fff; background: #fff; }
-    #result { margin-top: 20px; line-height: 1.6; color: #ddd; }
-    /* Footer */
-    .footer { text-align: center; padding: 20px; color: #bbb; font-size: 0.9rem; }
-    /* Responsive */
-    @media (max-width: 768px) { .container { flex-direction: column; margin-top: -20px; } }
+
+    .form-group { margin-bottom: 20px; position: relative; }
+    .checkbox-group { display: flex; align-items: center; margin-top: 15px; }
+    .checkbox-group input { width: auto; margin-right: 8px; }
+
+    .btn { display: inline-block; margin-top: 20px; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: background 0.2s ease; }
+    .btn-primary { background: #ff6f61; color: #fff; }
+    .btn-primary:disabled { background: #999; cursor: not-allowed; }
+    .btn-primary:hover:not(:disabled) { background: #e65b51; }
+    .btn-success { background: #10b981; color: #fff; }
+    .btn-success:hover { background: #0e9a6e; }
+    .spinner { display: none; width: 24px; height: 24px; border: 3px solid #eee; border-top: 3px solid #ff6f61; border-radius: 50%; animation: spin 1s linear infinite; margin-left: 10px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Responsive layout */
+    @media (min-width: 768px) {
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    }
   </style>
 </head>
 <body>
-  <!-- Particles.js container -->
-  <div id="tsparticles"></div>
-
-  <!-- Hero -->
-  <section class="hero" data-aos="fade-down">
-    <h1>Unlock Your Future</h1>
-    <p>Experience expert Vedic astrology insights tailored for you.</p>
-    <button class="cta-btn" onclick="document.getElementById('name').focus()">Get Started</button>
-  </section>
-
-  <!-- Main -->
   <div class="container" data-aos="fade-up">
-    <!-- Form Panel -->
-    <div class="form-panel" data-aos="fade-right">
-      <label for="name">Name</label>
-      <input type="text" id="name" placeholder="Your Name" required pattern="[A-Za-z\s]+" title="Only letters and spaces" />
-
-      <label for="dob">Date of Birth</label>
-      <input type="date" id="dob" max="" required />
-
-      <label for="time">Time of Birth</label>
-      <input type="time" id="time" required />
-
-      <label for="location">Location</label>
-      <div class="autocomplete">
-        <input type="text" id="location" placeholder="City, State, Country" required autocomplete="off" />
-        <div id="location-list" class="autocomplete-items"></div>
+    <h1>Palmology Jyotish Predictions</h1>
+    <div class="grid">
+      <div>
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" pattern="[A-Za-z\s]+" required />
+        </div>
+        <div class="form-group">
+          <label for="dob">Date of Birth</label>
+          <input type="date" id="dob" max="" required />
+        </div>
+        <div class="form-group">
+          <label for="time">Time of Birth</label>
+          <input type="time" id="time" required />
+        </div>
+        <div class="form-group autocomplete-list">
+          <label for="location">Location (India only)</label>
+          <input type="text" id="location" placeholder="City, State..." autocomplete="off" required />
+          <div class="autocomplete-items" id="loc-list"></div>
+        </div>
+        <div class="form-group">
+          <label for="language">Language</label>
+          <select id="language" required>
+            <option value="" disabled selected>Select</option>
+            <option value="english">English</option>
+            <option value="hindi">Hindi</option>
+          </select>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="remember" />
+          <label for="remember">Remember Me</label>
+        </div>
+        <button id="predictBtn" class="btn btn-primary" disabled onclick="getPrediction()">
+          Get Prediction <span class="spinner" id="spinner"></span>
+        </button>
+        <button id="downloadBtn" class="btn btn-success" style="display:none" onclick="downloadPdf()">
+          Download Predictions
+        </button>
       </div>
-
-      <label for="language">Language</label>
-      <select id="language" required>
-        <option value="">Select Language</option>
-        <option value="english">English</option>
-        <option value="hindi">Hindi</option>
-      </select>
-
-      <button class="btn btn-primary" id="predictBtn" onclick="getPrediction()" disabled>
-        Get Prediction <div class="spinner" id="spinner"></div>
-      </button>
-      <button class="btn btn-success" id="downloadPdfBtn" style="display:none" onclick="downloadPdf()">
-        Download Predictions
-      </button>
-
-      <div id="chart"></div>
-    </div>
-
-    <!-- Result Panel -->
-    <div class="result-panel" data-aos="fade-left">
-      <div id="result">Your prediction will appear here...</div>
+      <div>
+        <div id="chart"></div>
+        <div id="result">Your prediction will appear here...</div>
+      </div>
     </div>
   </div>
 
-  <div class="footer">Designed by Palmology</div>
-
-  <!-- Scripts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.9.3/tsparticles.bundle.min.js"></script>
   <script>
-    // Utility
-    function debounce(fn, delay) { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); }; }
+    // Set max date for DOB to today
+    document.getElementById('dob').max = new Date().toISOString().split('T')[0];
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // Set max date constraint
-      document.getElementById('dob').max = new Date().toISOString().split('T')[0];
-
-      // AOS init
-      if (window.AOS) AOS.init({ duration: 800, once: true });
-
-      // tsParticles init
-      if (window.tsParticles) {
-        tsParticles.load('tsparticles', {
-          fpsLimit: 60,
-          particles: { number: { value: 100, density: { enable: true, area: 800 } }, color: { value: ['#ffffff','#ffff00'] }, shape: { type: 'star' }, opacity: { value: 0.7, random: true }, size: { value: { min: 1, max: 3 }, random: true }, move: { enable: true, speed: 1.2, direction: 'bottom', outModes: { default: 'out'} } },
-          detectRetina: true
+    // Load remembered values
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('remember') === 'true') {
+        ['name','dob','time','location','language'].forEach(id => {
+          const val = localStorage.getItem(id);
+          if (val) document.getElementById(id).value = val;
         });
+        document.getElementById('remember').checked = true;
       }
-
-      // Form validity
-      const fields = ['name','dob','time','location','language'];
-      const predictBtn = document.getElementById('predictBtn');
-      function validateForm() {
-        let valid = true;
-        fields.forEach(id => {
-          const el = document.getElementById(id);
-          if (!el.checkValidity()) {
-            el.classList.add('invalid'); valid = false;
-          } else {
-            el.classList.remove('invalid');
-          }
-        });
-        predictBtn.disabled = !valid;
-      }
-      fields.forEach(id => document.getElementById(id).addEventListener('input', validateForm));
-
-      // Location autocomplete & selection flag
-      const locInput = document.getElementById('location');
-      const listDiv = document.getElementById('location-list');
-      let selectedLocation = null;
-      locInput.addEventListener('input', () => { selectedLocation = null; validateForm(); });
-      locInput.addEventListener('input', debounce(async () => {
-        const q = locInput.value.trim(); listDiv.innerHTML = '';
-        if (q.length < 3) return;
-        try {
-          const res = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(q)}&countrycode=IN&limit=5&key=15459e2a83eb42de9cd2b77a168c9307`);
-          const js = await res.json();
-          js.results.forEach(r => {
-            const item = document.createElement('div'); item.className = 'autocomplete-item'; item.textContent = r.formatted;
-            item.onclick = () => { locInput.value = r.formatted; selectedLocation = r.geometry; listDiv.innerHTML = ''; validateForm(); };
-            listDiv.appendChild(item);
-          });
-        } catch {};
-      }, 300));
-      document.addEventListener('click', e => { if (!locInput.contains(e.target)) listDiv.innerHTML = ''; });
-
+      validateForm();
     });
 
-    // Prediction & PDF (unchanged)
-    async function getPrediction() { /* ... */ }
-    function downloadPdf() { /* ... */ }
+    // Validate form and toggle button
+    ['name','dob','time','location','language'].forEach(id => {
+      document.getElementById(id).addEventListener('input', validateForm);
+    });
+    function validateForm() {
+      const valid = Array.from(['name','dob','time','location','language']).every(id => {
+        const el = document.getElementById(id);
+        return el.checkValidity();
+      });
+      document.getElementById('predictBtn').disabled = !valid;
+    }
+
+    // Debounce helper
+    function debounce(fn, delay) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
+
+    // Autocomplete for location using OpenCage (India-only)
+    const locInput = document.getElementById('location');
+    const locList = document.getElementById('loc-list');
+    locInput.addEventListener('input', debounce(async () => {
+      const q = locInput.value.trim();
+      locList.innerHTML = '';
+      if (q.length < 3) return;
+      try {
+        const res = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(q)}&key=15459e2a83eb42de9cd2b77a168c9307&countrycode=IN&limit=5`);
+        const data = await res.json();
+        data.results.forEach(r => {
+          const div = document.createElement('div');
+          div.className = 'autocomplete-item';
+          div.textContent = r.formatted;
+          div.addEventListener('click', () => {
+            locInput.value = r.formatted;
+            locList.innerHTML = '';
+            validateForm();
+          });
+          locList.appendChild(div);
+        });
+      } catch (e) { console.error(e); }
+    }, 300));
+
+    // Prediction and Remember Me
+    async function getPrediction() {
+      const spinner = document.getElementById('spinner'); spinner.style.display = 'inline-block';
+      // Remember inputs
+      if (document.getElementById('remember').checked) {
+        localStorage.setItem('remember', 'true');
+        ['name','dob','time','location','language'].forEach(id => {
+          localStorage.setItem(id, document.getElementById(id).value);
+        });
+      } else {
+        localStorage.clear();
+      }
+      // ... proceed with fetch, display chart & result, then hide spinner
+      // (existing getPrediction logic)  
+      setTimeout(() => { spinner.style.display = 'none'; }, 2000);
+    }
+
+    function downloadPdf() {
+      // existing download logic
+    }
   </script>
 </body>
 </html>
