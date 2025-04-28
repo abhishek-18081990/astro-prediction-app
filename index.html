@@ -65,8 +65,15 @@
       animation:spin 1s linear infinite;
     }
     @keyframes spin { to{transform:rotate(360deg)} }
+    /* initial hidden boxes */
     #chart, #result {
+      display:none;
       max-width:600px; margin:20px auto;
+    }
+    /* reveal with white background after load */
+    #pdfContent.loaded #chart,
+    #pdfContent.loaded #result {
+      display:block;
       background:#fff; color:#000; padding:20px; border-radius:8px;
     }
     #chart img, #chart svg {
@@ -130,6 +137,7 @@
     const remember = document.getElementById('rememberMe');
     const datalist = document.getElementById('location-list');
     const downloadBtn = document.getElementById('downloadPdfBtn');
+    const pdfContainer = document.getElementById('pdfContent');
     const OC_KEY = '15459e2a83eb42de9cd2b77a168c9307';
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -139,7 +147,7 @@
           fpsLimit:60,
           particles:{ number:{value:80}, color:{value:['#fff','#ff0']}, shape:{type:'star'},
           opacity:{value:0.7,random:true}, size:{value:{min:1,max:3},random:true},
-          move:{enable:true,speed:1.2,direction:'bottom',outModes:{default:'out'}} },
+          move:{enable:true,speed:1.2,direction:'bottom', outModes:{default:'out'}} },
           detectRetina:true
         });
       }
@@ -196,15 +204,16 @@
       spinner.style.display = 'inline-block';
       getBtn.disabled = true;
       downloadBtn.style.display = 'none';
+      // hide containers until we fill them
+      pdfContainer.classList.remove('loaded');
       document.getElementById('result').innerText = 'Generating prediction...';
-      document.getElementById('chart').innerHTML = '';
+      document.getElementById('chart').innerHTML = '';  
 
       // parse
       const [year,mo,da] = document.getElementById('dob').value.split('-').map(Number);
       const [hr,mi]   = document.getElementById('time').value.split(':').map(Number);
 
       try {
-        // geocode
         const geoRes = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(document.getElementById('location').value)}&countrycode=IN&limit=1&key=${OC_KEY}`);
         const geoJson = await geoRes.json();
         if (!geoJson.results?.length) throw new Error('No location found');
@@ -232,6 +241,8 @@
           if (data.chartSvg) {
             document.getElementById('chart').innerHTML = `<h5>Your Lagan Chart (D1)</h5><div>${data.chartSvg}</div>`;
           }
+          // now reveal styled boxes
+          pdfContainer.classList.add('loaded');
           downloadBtn.style.display = 'inline-block';
         } else {
           document.getElementById('result').innerText = 'Prediction failed. Try again.';
