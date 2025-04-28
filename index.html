@@ -79,6 +79,18 @@
     #chart img, #chart svg {
       width:100%; border-radius:8px;
     }
+    /* Footer styling */
+    .footer {
+      text-align:center;
+      margin-top:40px;
+      color:#bbb;
+      font-size:0.9rem;
+    }
+    .footer a {
+      color:#ff6f61;
+      text-decoration:none;
+      font-weight:bold;
+    }
   </style>
 </head>
 <body>
@@ -89,7 +101,7 @@
     <input type="text" id="name" required pattern="^[A-Za-z\s]+$" title="Letters and spaces only"/>
 
     <label for="dob">Date of Birth</label>
-    <input type="date" id="dob" required max="<?= new Date().toISOString().split('T')[0] ?>" />
+    <input type="date" id="dob" required max="" />
 
     <label for="time">Time of Birth</label>
     <input type="time" id="time" required/>
@@ -141,6 +153,8 @@
     const OC_KEY = '15459e2a83eb42de9cd2b77a168c9307';
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Set max date for DOB field
+      document.getElementById('dob').max = new Date().toISOString().split('T')[0];
       AOS?.init({ duration:800, once:true });
       if (window.tsParticles) {
         tsParticles.load('tsparticles', {
@@ -267,5 +281,9 @@
       }).save();
     });
   </script>
+
+  <div class="footer">
+    Developed by <a href="https://palmology.odoo.com/" target="_blank" rel="noopener">Abhishek</a>
+  </div>
 </body>
 </html>
